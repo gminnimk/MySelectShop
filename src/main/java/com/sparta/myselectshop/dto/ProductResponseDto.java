@@ -1,8 +1,12 @@
 package com.sparta.myselectshop.dto;
 
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.entity.ProductFolder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 // 이 클래스는 서버에서 클라이언트로 전송되는 제품 정보를 캡슐화합니다.
@@ -29,6 +33,7 @@ public class ProductResponseDto {
     private int myprice; // 사용자가 설정한 희망 가격을 저장합니다.
 
 
+    private List<FolderResponseDto> productFolderList = new ArrayList<>();
 
 
     // Product 객체를 매개변수로 받는 생성자입니다. Product 엔티티 객체의 필드 값을 ProductResponseDto 객체의 필드에 복사합니다.
@@ -41,5 +46,8 @@ public class ProductResponseDto {
         this.image = product.getImage();
         this.lprice = product.getLprice();
         this.myprice = product.getMyprice();
+        for (ProductFolder productFolder : product.getProductFolderList()) {
+            productFolderList.add(new FolderResponseDto(productFolder.getFolder()));
+        }
     }
 }
