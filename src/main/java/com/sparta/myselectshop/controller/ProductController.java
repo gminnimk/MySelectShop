@@ -4,12 +4,11 @@ package com.sparta.myselectshop.controller;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
-import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +30,6 @@ public class ProductController {
     private final ProductService productService; // ProductService 클래스를 주입받아 사용합니다. 이 필드는 @RequiredArgsConstructor 애노테이션 덕분에 자동으로 초기화됩니다.
 
 
-
     // @PostMapping("/products"): HTTP POST 요청이 /api/products 경로로 들어올 때 이 메서드가 실행됩니다.
     // public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto): 이 메서드는 ProductRequestDto 객체를 요청 본문에서 받아서 ProductResponseDto 객체를 반환합니다.
     // @RequestBody: 요청 본문을 자바 객체로 변환해주는 애노테이션입니다.
@@ -41,7 +39,6 @@ public class ProductController {
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.createProduct(requestDto, userDetails.getUser());
     }
-
 
 
     // @PutMapping("/products/{id}"): 이 애노테이션은 HTTP PUT 요청을 처리하는 메서드를 정의합니다. /products/{id} 경로는 업데이트할 제품의 ID를 URL 경로 변수로 받습니다.
@@ -57,9 +54,6 @@ public class ProductController {
     }
 
 
-
-
-
     // '/products' 경로로 GET 요청이 들어왔을 때, 제품 목록을 조회하여 클라이언트에게 반환하는 컨트롤러 메서드입니다.
     //  클라이언트가 제품 목록을 요청할 때 사용됩니다. 클라이언트는 /products 경로로 GET 요청을 보내면 이 메서드가 호출되어 제품 목록을 응답으로 받아올 수 있습니다.
 
@@ -69,14 +63,18 @@ public class ProductController {
     // 이는 클라이언트에게 제품 목록의 각 제품 정보를 담은 DTO 객체들을 전달하기 위함입니다.
 
     @GetMapping("/products")
-    public List<ProductResponseDto> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-
+    public Page<ProductResponseDto> getProducts(
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("sortBy") String sortBy,
+            @RequestParam("isAsc") boolean isAsc,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
 
         // productService.getProducts(): ProductService 클래스의 getProducts 메서드를 호출하여 제품 목록을 가져옵니다.
         // 이 메서드는 실제로 데이터베이스에서 제품을 조회하고, 각 제품을 ProductResponseDto로 변환하여 리스트로 반환합니다.
         // getProducts 메서드가 반환한 제품 목록을 그대로 클라이언트에게 반환합니다.
-        return productService.getProducts(userDetails.getUser());
+        return productService.getProducts(userDetails.getUser(), page-1, size, sortBy, isAsc);
     }
 
 

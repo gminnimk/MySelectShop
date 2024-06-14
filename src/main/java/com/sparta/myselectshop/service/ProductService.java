@@ -6,10 +6,15 @@ import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.entity.User;
+import com.sparta.myselectshop.entity.UserRoleEnum;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -82,25 +87,25 @@ public class ProductService {
     // public: 이 메서드는 공개(public)되어 있어 다른 클래스에서 호출할 수 있습니다.
     // List<ProductResponseDto>: ProductResponseDto 객체들을 담고 있는 리스트를 반환합니다. 각 객체는 제품의 정보를 클라이언트에게 전달하는 데 사용됩니다.
     // getProducts(): 메서드 이름은 getProducts로, 클라이언트가 제품 목록을 가져오는 기능을 수행합니다.
-    public List<ProductResponseDto> getProducts(User user) {
+    public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
 
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        // productRepository.findAll(): 데이터베이스에 저장된 모든 제품을 조회하여 productList에 저장합니다.
-        // List<ProductResponseDto> responseDtoList = new ArrayList<>();: ProductResponseDto 객체들을 담을 새로운 리스트 responseDtoList를 생성합니다.
-        List<Product> productList = productRepository.findAllByUser(user);
-        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+        UserRoleEnum userRoleEnum = user.getRole();
 
+        Page<Product> productList;
 
-        // for (Product product : productList) { ... }: productList에 있는 각 Product 객체를 반복하면서,
-        // new ProductResponseDto(product): 각 Product 객체를 ProductResponseDto로 변환하여 responseDtoList에 추가합니다.
-        for (Product product : productList) {
-            responseDtoList.add(new ProductResponseDto(product));
+        if (userRoleEnum == UserRoleEnum.USER) {
+            productList = productRepository.findAllByUser(user, pageable);
+        } else {
+            productList = productRepository.findAll(pageable);
         }
 
-
-        // ProductResponseDto 객체들을 담고 있는 responseDtoList를 반환합니다.
-        return responseDtoList;
+        return productList.map(ProductResponseDto::new);
     }
+
 
     @Transactional
     public void updateBySearch(Long id, ItemDto itemDto) {

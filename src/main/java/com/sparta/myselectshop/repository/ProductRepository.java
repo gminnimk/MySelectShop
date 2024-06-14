@@ -2,6 +2,8 @@ package com.sparta.myselectshop.repository;
 
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -28,5 +30,5 @@ CRUD 작업: JpaRepository는 기본적으로 save(), findById(), findAll(), del
 // 여기서 Product는 이 레포지토리가 다룰 엔티티 클래스의 타입이고, Long은 엔티티의 기본 키 타입입니다.
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findAllByUser(User user);
+    Page<Product> findAllByUser(User user, Pageable pageable);
 }
