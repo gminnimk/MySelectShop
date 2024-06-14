@@ -5,10 +5,10 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.entity.User;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +42,8 @@ public class ProductService {
 
     public static final int MIN_MY_PRICE = 100;
 
-    public ProductResponseDto createProduct(ProductRequestDto requestDto) { // 클라이언트로부터 전달받은 ProductRequestDto 객체를 바탕으로 새로운 제품을 생성하는 메서드입니다.
-        Product product = productRepository.save(new Product(requestDto)); // ProductRequestDto 객체를 사용해 새로운 Product 객체를 생성하고, 이를 productRepository를 통해 데이터베이스에 저장합니다.
+    public ProductResponseDto createProduct(ProductRequestDto requestDto, User user) { // 클라이언트로부터 전달받은 ProductRequestDto 객체를 바탕으로 새로운 제품을 생성하는 메서드입니다.
+        Product product = productRepository.save(new Product(requestDto, user)); // ProductRequestDto 객체를 사용해 새로운 Product 객체를 생성하고, 이를 productRepository를 통해 데이터베이스에 저장합니다.
         return new ProductResponseDto(product); // 저장된 Product 객체를 ProductResponseDto로 변환하여 반환합니다. 이는 클라이언트에게 저장된 제품 정보를 응답하기 위함입니다.
     }
 
@@ -82,12 +82,12 @@ public class ProductService {
     // public: 이 메서드는 공개(public)되어 있어 다른 클래스에서 호출할 수 있습니다.
     // List<ProductResponseDto>: ProductResponseDto 객체들을 담고 있는 리스트를 반환합니다. 각 객체는 제품의 정보를 클라이언트에게 전달하는 데 사용됩니다.
     // getProducts(): 메서드 이름은 getProducts로, 클라이언트가 제품 목록을 가져오는 기능을 수행합니다.
-    public List<ProductResponseDto> getProducts() {
+    public List<ProductResponseDto> getProducts(User user) {
 
 
         // productRepository.findAll(): 데이터베이스에 저장된 모든 제품을 조회하여 productList에 저장합니다.
         // List<ProductResponseDto> responseDtoList = new ArrayList<>();: ProductResponseDto 객체들을 담을 새로운 리스트 responseDtoList를 생성합니다.
-        List<Product> productList = productRepository.findAll();
+        List<Product> productList = productRepository.findAllByUser(user);
         List<ProductResponseDto> responseDtoList = new ArrayList<>();
 
 
@@ -108,6 +108,18 @@ public class ProductService {
                 new NullPointerException("해당 상품은 존재하지 않습니다.")
         );
         product.updateByItemDto(itemDto);
+    }
+
+    public List<ProductResponseDto> getAllProducts() {
+        List<Product> productList = productRepository.findAll();
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(new ProductResponseDto(product));
+        }
+
+        return responseDtoList;
+
     }
 }
 

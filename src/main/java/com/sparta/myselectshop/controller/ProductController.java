@@ -5,8 +5,11 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +38,8 @@ public class ProductController {
     // return productService.createProduct(requestDto): productService의 createProduct 메서드를 호출하여 새로운 제품을 생성하고, 그 결과를 반환합니다.
 
     @PostMapping("/products")
-    public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
-        return productService.createProduct(requestDto);
+    public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return productService.createProduct(requestDto, userDetails.getUser());
     }
 
 
@@ -66,12 +69,19 @@ public class ProductController {
     // 이는 클라이언트에게 제품 목록의 각 제품 정보를 담은 DTO 객체들을 전달하기 위함입니다.
 
     @GetMapping("/products")
-    public List<ProductResponseDto> getProducts() {
+    public List<ProductResponseDto> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+
 
 
         // productService.getProducts(): ProductService 클래스의 getProducts 메서드를 호출하여 제품 목록을 가져옵니다.
         // 이 메서드는 실제로 데이터베이스에서 제품을 조회하고, 각 제품을 ProductResponseDto로 변환하여 리스트로 반환합니다.
         // getProducts 메서드가 반환한 제품 목록을 그대로 클라이언트에게 반환합니다.
-        return productService.getProducts();
+        return productService.getProducts(userDetails.getUser());
+    }
+
+
+    @GetMapping("/admin/products")
+    public List<ProductResponseDto> getAllProducts() {
+        return productService.getAllProducts();
     }
 }
