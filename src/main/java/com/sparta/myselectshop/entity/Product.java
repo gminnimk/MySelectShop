@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 // 이 클래스는 데이터베이스 테이블에 매핑되어, 제품 정보를 저장하는 역할을 합니다.
 
@@ -52,6 +55,9 @@ public class Product extends Timestamped { // Product 클래스는 Timestamped �
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "product")
+    private List<ProductFolder> productFolderList = new ArrayList<>();
 
 
     // public Product(ProductRequestDto requestDto): ProductRequestDto 객체를 매개변수로 받는 생성자입니다.
