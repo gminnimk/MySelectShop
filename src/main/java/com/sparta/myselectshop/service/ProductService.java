@@ -5,8 +5,10 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +58,6 @@ public class ProductService {
         }
 
 
-
         // productRepository.findById(id): 주어진 ID에 해당하는 상품을 데이터베이스에서 조회합니다.
         // .orElseThrow(...): 조회한 상품이 없으면 NullPointerException을 발생시킵니다.
         // product.update(requestDto): 조회한 상품 객체의 정보를 클라이언트가 전달한 희망 가격으로 업데이트합니다.
@@ -71,10 +72,6 @@ public class ProductService {
 
         return new ProductResponseDto(product); // 업데이트된 상품 정보를 담고 있는 ProductResponseDto 객체를 생성하여 반환합니다.
     }
-
-
-
-
 
 
     //  제품 목록을 조회하여 각 제품을 ProductResponseDto로 변환한 후, 클라이언트에게 반환하는 메서드입니다.
@@ -103,6 +100,14 @@ public class ProductService {
 
         // ProductResponseDto 객체들을 담고 있는 responseDtoList를 반환합니다.
         return responseDtoList;
+    }
+
+    @Transactional
+    public void updateBySearch(Long id, ItemDto itemDto) {
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new NullPointerException("해당 상품은 존재하지 않습니다.")
+        );
+        product.updateByItemDto(itemDto);
     }
 }
 
