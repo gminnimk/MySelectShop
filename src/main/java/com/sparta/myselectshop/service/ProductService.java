@@ -10,6 +10,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 // 이 서비스는 주로 Product 엔티티와 관련된 비즈니스 로직을 처리합니다.
 
@@ -67,6 +70,39 @@ public class ProductService {
         product.update(requestDto);
 
         return new ProductResponseDto(product); // 업데이트된 상품 정보를 담고 있는 ProductResponseDto 객체를 생성하여 반환합니다.
+    }
+
+
+
+
+
+
+    //  제품 목록을 조회하여 각 제품을 ProductResponseDto로 변환한 후, 클라이언트에게 반환하는 메서드입니다.
+    // 주로 제품 목록을 가져와서 화면에 표시하거나 API를 통해 클라이언트에게 제공할 때 사용됩니다.
+    // 클라이언트는 이 메서드를 호출하여 모든 제품의 정보를 받아와 활용할 수 있습니다.
+
+
+    // public: 이 메서드는 공개(public)되어 있어 다른 클래스에서 호출할 수 있습니다.
+    // List<ProductResponseDto>: ProductResponseDto 객체들을 담고 있는 리스트를 반환합니다. 각 객체는 제품의 정보를 클라이언트에게 전달하는 데 사용됩니다.
+    // getProducts(): 메서드 이름은 getProducts로, 클라이언트가 제품 목록을 가져오는 기능을 수행합니다.
+    public List<ProductResponseDto> getProducts() {
+
+
+        // productRepository.findAll(): 데이터베이스에 저장된 모든 제품을 조회하여 productList에 저장합니다.
+        // List<ProductResponseDto> responseDtoList = new ArrayList<>();: ProductResponseDto 객체들을 담을 새로운 리스트 responseDtoList를 생성합니다.
+        List<Product> productList = productRepository.findAll();
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+
+        // for (Product product : productList) { ... }: productList에 있는 각 Product 객체를 반복하면서,
+        // new ProductResponseDto(product): 각 Product 객체를 ProductResponseDto로 변환하여 responseDtoList에 추가합니다.
+        for (Product product : productList) {
+            responseDtoList.add(new ProductResponseDto(product));
+        }
+
+
+        // ProductResponseDto 객체들을 담고 있는 responseDtoList를 반환합니다.
+        return responseDtoList;
     }
 }
 
