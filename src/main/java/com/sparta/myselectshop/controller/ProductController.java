@@ -1,14 +1,12 @@
 package com.sparta.myselectshop.controller;
 
 
+import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 // Spring Boot 프레임워크를 사용하여 웹 애플리케이션의 일부로 작성된 RESTful 컨트롤러입니다.
 
@@ -36,5 +34,19 @@ public class ProductController {
     @PostMapping("/products")
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
         return productService.createProduct(requestDto);
+    }
+
+
+
+    // @PutMapping("/products/{id}"): 이 애노테이션은 HTTP PUT 요청을 처리하는 메서드를 정의합니다. /products/{id} 경로는 업데이트할 제품의 ID를 URL 경로 변수로 받습니다.
+    // public ProductResponseDto updateProduct(...): 이 메서드는 ProductResponseDto 객체를 반환합니다. 이는 클라이언트에게 업데이트된 제품 정보를 응답하기 위함입니다.
+
+    // @PathVariable Long id: URL 경로에서 {id} 부분을 추출하여 id 변수에 할당합니다. 이 변수는 업데이트할 제품의 고유 식별자입니다.
+    // @RequestBody ProductMypriceRequestDto requestDto: 요청 본문에서 ProductMypriceRequestDto 객체를 추출하여 requestDto 변수에 할당합니다.
+    // 이 객체는 클라이언트가 보내는 업데이트할 제품의 새로운 희망 가격을 담고 있습니다.
+
+    @PutMapping("/products/{id}")
+    public ProductResponseDto updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto) throws IllegalAccessException {
+        return productService.updateProduct(id, requestDto); // ProductService 클래스의 updateProduct 메서드를 호출하여 제품 정보를 업데이트합니다. 이때 제품의 ID와 새로운 희망 가격을 담고 있는 requestDto 객체를 전달합니다.
     }
 }

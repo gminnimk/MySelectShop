@@ -1,10 +1,12 @@
 package com.sparta.myselectshop.service;
 
 
+import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +35,39 @@ public class ProductService {
     private final ProductRepository productRepository;
 
 
+    public static final int MIN_MY_PRICE = 100;
+
     public ProductResponseDto createProduct(ProductRequestDto requestDto) { // 클라이언트로부터 전달받은 ProductRequestDto 객체를 바탕으로 새로운 제품을 생성하는 메서드입니다.
         Product product = productRepository.save(new Product(requestDto)); // ProductRequestDto 객체를 사용해 새로운 Product 객체를 생성하고, 이를 productRepository를 통해 데이터베이스에 저장합니다.
         return new ProductResponseDto(product); // 저장된 Product 객체를 ProductResponseDto로 변환하여 반환합니다. 이는 클라이언트에게 저장된 제품 정보를 응답하기 위함입니다.
     }
+
+    @Transactional // 이 애노테이션은 메서드가 하나의 트랜잭션으로 실행됨을 나타냅니다. 메서드 내에서 일어나는 모든 데이터베이스 작업은 하나의 단위로 처리됩니다.
+    public ProductResponseDto updateProduct(Long id, ProductMypriceRequestDto requestDto) throws IllegalAccessException {
+
+        // int myprice = requestDto.getMyprice();: 클라이언트가 전달한 새로운 희망 가격을 가져옵니다.
+        // if (myprice < MIN_MY_PRICE) { ... }: 가져온 희망 가격이 설정한 최소 허용 가격(MIN_MY_PRICE)보다 낮으면 예외를 발생시킵니다.
+        int myprice = requestDto.getMyprice();
+        if (myprice < MIN_MY_PRICE) {
+            throw new IllegalAccessException("유효하지 않은 관심 가격입니다. 최소 " + MIN_MY_PRICE + "원 이상으로 설정해 주세요.");
+        }
+
+
+
+        // productRepository.findById(id): 주어진 ID에 해당하는 상품을 데이터베이스에서 조회합니다.
+        // .orElseThrow(...): 조회한 상품이 없으면 NullPointerException을 발생시킵니다.
+        // product.update(requestDto): 조회한 상품 객체의 정보를 클라이언트가 전달한 희망 가격으로 업데이트합니다.
+
+        //  제품의 희망 가격을 업데이트하는 REST API 엔드포인트에서 사용될 수 있습니다.
+        //  클라이언트는 PUT 요청을 통해 특정 상품의 희망 가격을 변경하고, 이 메서드는 그 변경을 처리하여 응답합니다.
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new NullPointerException("해당 상품을 찾을 수 없습니다.")
+        );
+
+        product.update(requestDto);
+
+        return new ProductResponseDto(product); // 업데이트된 상품 정보를 담고 있는 ProductResponseDto 객체를 생성하여 반환합니다.
+    }
 }
+
+
