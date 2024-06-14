@@ -28,4 +28,6 @@ public class ProductRequestDto {
     private String link;
     // 관심상품의 최저가
     private int lprice;
+
+
 }
