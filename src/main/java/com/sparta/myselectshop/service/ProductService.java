@@ -6,6 +6,8 @@ import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -76,5 +78,28 @@ public class ProductService {
 
         // 업데이트된 상품을 기반으로 ProductResponseDto를 생성하여 반환합니다.
         return new ProductResponseDto(product);
+    }
+
+    /**
+     * ✅ 데이터베이스에서 모든 상품 정보를 조회하여, DTO 리스트로 변환합니다.
+     *
+     *    ➡️ 데이터베이스에서 모든 상품을 조회하고, 각 상품을 `ProductResponseDto`로 변환한 후, 변환된 DTO 객체들을 리스트로 반환합니다.
+     *
+     * @return List<ProductResponseDto> 모든 상품 정보를 담고 있는 `ProductResponseDto` 객체 리스트입니다.
+     */
+    public List<ProductResponseDto> getProducts() {
+        // 데이터베이스에서 모든 상품을 조회합니다.
+        List<Product> productList = productRepository.findAll();
+
+        // 조회한 상품을 DTO 리스트로 변환하기 위한 빈 리스트를 생성합니다.
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        // 조회한 각 상품을 ProductResponseDto로 변환하여 리스트에 추가합니다.
+        for (Product product : productList) {
+            responseDtoList.add(new ProductResponseDto(product));
+        }
+
+        // 변환된 DTO 리스트를 반환합니다.
+        return responseDtoList;
     }
 }

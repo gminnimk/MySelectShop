@@ -4,7 +4,9 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.service.ProductService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,5 +54,18 @@ public class ProductController {
     @PutMapping("/products/{id}")
     public ProductResponseDto updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto) throws IllegalAccessException {
         return productService.updateProduct(id, requestDto);
+    }
+
+    /**
+     * ✅ 모든 상품의 목록을 조회합니다.
+     *
+     *    ➡️ 데이터베이스에서 모든 상품을 조회하여 `ProductResponseDto` 객체 리스트로 반환합니다.
+     *
+     * @return List<ProductResponseDto> 모든 상품 정보를 담고 있는 DTO 객체 리스트입니다.
+     */
+    @GetMapping("/products")
+    public List<ProductResponseDto> getProducts() {
+        // 상품 목록을 조회하고 DTO 형식으로 반환합니다.
+        return productService.getProducts();
     }
 }
