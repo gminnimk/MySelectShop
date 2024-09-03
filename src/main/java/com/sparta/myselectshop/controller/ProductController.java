@@ -1,10 +1,13 @@
 package com.sparta.myselectshop.controller;
 
+import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,5 +36,21 @@ public class ProductController {
     public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
         // 서비스 계층의 createProduct 메서드를 호출하여 상품을 생성하고, 결과를 반환합니다.
         return productService.createProduct(requestDto);
+    }
+
+    /**
+     * ✅ 주어진 상품 ID에 해당하는 상품의 가격을 업데이트합니다.
+     *
+     *    ➡️ URL 경로에서 전달받은 상품 ID를 기반으로, 요청 본문에서 전달받은 `ProductMypriceRequestDto` 객체를 사용하여
+     *       해당 상품의 `myprice`를 업데이트합니다.
+     *
+     * @param id 업데이트할 상품의 고유 ID입니다.
+     * @param requestDto 상품의 사용자 설정 가격이 포함된 DTO 객체입니다.
+     * @return ProductResponseDto 업데이트된 상품 정보가 포함된 응답 DTO 객체입니다.
+     * @throws IllegalAccessException 요청 처리 중 예외가 발생할 경우 던져집니다.
+     */
+    @PutMapping("/products/{id}")
+    public ProductResponseDto updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto) throws IllegalAccessException {
+        return productService.updateProduct(id, requestDto);
     }
 }

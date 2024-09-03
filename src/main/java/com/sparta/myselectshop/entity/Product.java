@@ -1,5 +1,6 @@
 package com.sparta.myselectshop.entity;
 
+import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -49,5 +50,16 @@ public class Product extends Timestamped {
         this.image = requestDto.getImage(); // DTO에서 이미지 URL을 가져와 설정합니다.
         this.link = requestDto.getLink(); // DTO에서 링크 URL을 가져와 설정합니다.
         this.lprice = requestDto.getLprice(); // DTO에서 최저가를 가져와 설정합니다.
+    }
+
+    /**
+     * ✅ 사용자가 설정한 가격을 업데이트합니다.
+     *
+     *    ➡️ ProductMypriceRequestDto를 사용하여 `myprice` 필드를 업데이트합니다.
+     *
+     * @param requestDto 사용자 설정 가격이 포함된 DTO 객체입니다.
+     */
+    public void update(ProductMypriceRequestDto requestDto) {
+        this.myprice = requestDto.getMyprice(); // DTO에서 설정된 가격을 가져와 `myprice` 필드를 업데이트합니다.
     }
 }
