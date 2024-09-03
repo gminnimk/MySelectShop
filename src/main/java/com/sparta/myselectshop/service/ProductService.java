@@ -4,6 +4,7 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -101,5 +102,26 @@ public class ProductService {
 
         // 변환된 DTO 리스트를 반환합니다.
         return responseDtoList;
+    }
+
+    /**
+     * ✅ 주어진 상품 ID와 ItemDto를 사용하여 상품 정보를 업데이트합니다.
+     *
+     *    ➡️ 먼저, 주어진 ID로 상품을 조회한 후, 해당 상품이 존재하지 않으면 예외를 발생시킵니다.
+     *    ➡️ 상품이 존재하면, ItemDto를 사용하여 상품의 정보를 업데이트합니다.
+     *
+     * @param id 업데이트할 상품의 ID입니다.
+     * @param itemDto 상품 정보를 업데이트하는 데 사용할 ItemDto 객체입니다.
+     * @throws NullPointerException 상품이 존재하지 않을 경우 발생하는 예외입니다.
+     */
+    @Transactional
+    public void updateBySearch(Long id, ItemDto itemDto) {
+        // 주어진 ID로 상품을 조회하고, 상품이 존재하지 않으면 예외를 발생시킵니다.
+        Product product = productRepository.findById(id).orElseThrow(() ->
+            new NullPointerException("해당 상품은 존재하지 않습니다.")
+        );
+
+        // 조회된 상품 객체의 정보를 ItemDto를 사용하여 업데이트합니다.
+        product.updateByItemDto(itemDto);
     }
 }
