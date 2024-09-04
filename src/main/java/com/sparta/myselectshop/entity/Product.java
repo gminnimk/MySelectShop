@@ -4,6 +4,8 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -77,6 +79,14 @@ public class Product extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    /**
+     * ✅ 상품과 연관된 폴더 목록입니다.
+     *
+     *    ➡️ 상품이 포함된 폴더들을 리스트 형태로 저장합니다.
+     */
+    @OneToMany(mappedBy = "product") // 일대다 관계를 나타내며, "product" 필드에 의해 매핑됩니다.
+    private List<ProductFolder> productFolderList = new ArrayList<>();
 
     /**
      * ✅ ProductRequestDto를 기반으로 Product 객체를 초기화합니다.
