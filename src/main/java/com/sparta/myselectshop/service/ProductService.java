@@ -1,5 +1,10 @@
 package com.sparta.myselectshop.service;
 
+import com.sparta.myselectshop.entity.Folder;
+import com.sparta.myselectshop.entity.ProductFolder;
+import com.sparta.myselectshop.repository.FolderRepository;
+import com.sparta.myselectshop.repository.ProductFolderRepository;
+import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
@@ -29,6 +34,8 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
     private final ProductRepository productRepository; // 상품 정보를 처리하는 리포지토리
+    private final FolderRepository folderRepository;
+    private final ProductFolderRepository productFolderRepository;
 
     public static final int MIN_MY_PRICE = 100; // 사용자가 설정할 수 있는 최소 가격
 
@@ -162,4 +169,46 @@ public class ProductService {
         // 변환된 DTO 리스트를 반환합니다.
         return responseDtoList;
     }
+
+    /**
+     * ✅ 주어진 상품과 폴더를 연결하여 폴더에 상품을 추가하는 메서드입니다.
+     *
+     *    ➡️ 주어진 상품 ID와 폴더 ID를 기반으로 상품과 폴더를 조회하고, 로그인한 사용자가 이 상품과 폴더의 소유자인지 확인합니다.
+     *    ➡️ 상품과 폴더의 중복 연결 여부를 확인한 후, 중복이 없으면 상품과 폴더의 연결을 생성합니다.
+     *
+     * @param productId 상품의 고유 ID입니다.
+     * @param folderId 폴더의 고유 ID입니다.
+     * @param user 현재 로그인한 사용자 객체입니다.
+     * @throws NullPointerException 상품 또는 폴더가 존재하지 않을 경우 발생하는 예외입니다.
+     * @throws IllegalArgumentException 로그인한 사용자가 상품이나 폴더의 소유자가 아니거나, 중복된 폴더를 추가하려는 경우 발생하는 예외입니다.
+     */
+    public void addFolder(Long productId, Long folderId, User user) {
+
+        // 1) 상품을 조회합니다.
+        Product product = productRepository.findById(productId).orElseThrow(() ->
+            new NullPointerException("해당 상품이 존재하지 않습니다.")
+        );
+
+        // 2) 폴더를 조회합니다.
+        Folder folder = folderRepository.findById(folderId).orElseThrow(
+            () -> new NullPointerException("해당 폴더가 존재하지 않습니다.")
+        );
+
+        // 3) 조회한 폴더와 상품이 모두 로그인한 회원의 소유인지 확인합니다.
+        if (!product.getUser().getId().equals(user.getId())
+            || !folder.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("회원님의 관심상품이 아니거나, 회원님의 폴더가 아닙니다.");
+        }
+
+        // 4) 상품과 폴더의 중복 연결 여부를 확인합니다.
+        Optional<ProductFolder> overlapFolder = productFolderRepository.findByProductAndFolder(product, folder);
+
+        if (overlapFolder.isPresent()) {
+            throw new IllegalArgumentException("중복된 폴더입니다.");
+        }
+
+        // 5) 상품과 폴더의 연결을 생성합니다.
+        productFolderRepository.save(new ProductFolder(product, folder));
+    }
+
 }

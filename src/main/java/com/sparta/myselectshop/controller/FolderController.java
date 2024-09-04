@@ -1,14 +1,12 @@
 package com.sparta.myselectshop.controller;
 
 import com.sparta.myselectshop.dto.FolderRequestDto;
+import com.sparta.myselectshop.dto.FolderResponseDto;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -41,5 +39,21 @@ public class FolderController {
 
         // 폴더 이름 목록과 현재 인증된 사용자를 기반으로 폴더를 추가합니다.
         folderService.addFolders(folderNames, userDetails.getUser());
+    }
+
+    /**
+     * ✅ 현재 인증된 사용자가 가진 모든 폴더의 목록을 반환합니다.
+     *
+     *    ➡️ 클라이언트로부터 인증된 사용자 정보를 기반으로 사용자가 가진 폴더 목록을 조회합니다.
+     *    ➡️ 요청 헤더의 인증 정보를 통해 현재 인증된 사용자의 정보를 가져오고,
+     *    ➡️ 이를 기반으로 폴더 목록을 조회하여 `FolderResponseDto` 객체의 리스트를 반환합니다.
+     *
+     * @param userDetails 현재 인증된 사용자의 상세 정보가 포함된 `UserDetailsImpl` 객체입니다.
+     * @return List<FolderResponseDto> 현재 인증된 사용자가 가진 폴더의 목록을 포함하는 DTO 객체 리스트입니다.
+     */
+    @GetMapping("/folders") // "/api/folders" 경로로 GET 요청을 처리합니다.
+    public List<FolderResponseDto> getFolders(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // 현재 인증된 사용자의 정보를 통해 폴더 목록을 조회하고 반환합니다.
+        return folderService.getFolders(userDetails.getUser());
     }
 }

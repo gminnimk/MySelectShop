@@ -92,4 +92,24 @@ public class ProductController {
         // 서비스 계층의 getAllProducts 메서드를 호출하여 모든 상품 목록을 조회하고 DTO 형식으로 반환합니다.
         return productService.getAllProducts();
     }
+
+    /**
+     * ✅ 특정 상품에 폴더를 추가하는 API 엔드포인트입니다.
+     *
+     *    ➡️ 클라이언트로부터 상품 ID와 폴더 ID를 받아서, 지정된 폴더에 해당 상품을 추가합니다.
+     *    ➡️ 요청 본문에 포함된 `productId`와 `folderId`, 그리고 인증된 사용자 정보를 기반으로 서비스 계층에서 폴더에 상품을 추가합니다.
+     *
+     * @param productId 폴더에 추가할 상품의 고유 ID입니다.
+     * @param folderId 상품을 추가할 폴더의 고유 ID입니다.
+     * @param userDetails 현재 인증된 사용자의 정보입니다.
+     */
+    @PostMapping("/products/{productId}/folder") // POST 메서드로 "/api/products/{productId}/folder" 경로에 매핑됩니다.
+    public void addFolder(
+        @PathVariable Long productId, // URL 경로에서 상품 ID를 추출합니다.
+        @RequestParam Long folderId, // 쿼리 파라미터에서 폴더 ID를 추출합니다.
+        @AuthenticationPrincipal UserDetailsImpl userDetails // 현재 인증된 사용자의 상세 정보를 추출합니다.
+    ) {
+        // 서비스 계층의 addFolder 메서드를 호출하여 상품을 폴더에 추가합니다.
+        productService.addFolder(productId, folderId, userDetails.getUser());
+    }
 }
