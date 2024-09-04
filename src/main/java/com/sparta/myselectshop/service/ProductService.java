@@ -1,5 +1,6 @@
 package com.sparta.myselectshop.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
@@ -8,7 +9,6 @@ import com.sparta.myselectshop.entity.User;
 import com.sparta.myselectshop.entity.UserRoleEnum;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +98,7 @@ public class ProductService {
      * @param isAsc 오름차순 정렬 여부를 나타냅니다.
      * @return Page<ProductResponseDto> 사용자가 등록한 모든 상품 정보를 담고 있는 페이지네이션된 DTO 객체 리스트입니다.
      */
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
         // 정렬 방식을 설정합니다.
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
