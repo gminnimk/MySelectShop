@@ -4,6 +4,7 @@ import com.sparta.myselectshop.naver.dto.ItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,12 @@ import java.util.List;
 public class NaverApiService {
 
     private final RestTemplate restTemplate; // REST API 호출을 위한 RestTemplate
+
+    @Value("${naver.api.client-id}")
+    private String clientId; // 네이버 API 클라이언트 ID
+
+    @Value("${naver.api.client-secret}")
+    private String clientSecret; // 네이버 API 클라이언트 시크릿
 
     /**
      * ✅ NaverApiService의 생성자입니다.
@@ -60,8 +67,8 @@ public class NaverApiService {
         // 요청 엔티티 생성: GET 메서드와 헤더에 클라이언트 ID 및 비밀번호 추가
         RequestEntity<Void> requestEntity = RequestEntity
             .get(uri)
-            .header("X-Naver-Client-Id", "{Client-Id}") // 클라이언트 ID
-            .header("X-Naver-Client-Secret", "{Client-Secret}") // 클라이언트 비밀번호
+            .header("X-Naver-Client-Id", clientId) // 클라이언트 ID
+            .header("X-Naver-Client-Secret", clientSecret) // 클라이언트 비밀번호
             .build();
 
         // 네이버 API 호출
