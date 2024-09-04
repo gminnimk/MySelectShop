@@ -1,5 +1,10 @@
 package com.sparta.myselectshop.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sparta.myselectshop.jwt.JwtUtil;
+import com.sparta.myselectshop.service.KakaoService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ui.Model;
 import com.sparta.myselectshop.dto.SignupRequestDto;
 import com.sparta.myselectshop.dto.UserInfoDto;
@@ -30,6 +35,8 @@ public class UserController {
 
     private final UserService userService;
     private final FolderService folderService;
+    private final KakaoService kakaoService;
+
 
     /**
      * ✅ 로그인 페이지를 반환합니다.
@@ -123,5 +130,33 @@ public class UserController {
 
         // "index" 템플릿의 "#fragment" 부분을 반환합니다.
         return "index :: #fragment";
+    }
+
+    /**
+     * ✅ 카카오 로그인 콜백을 처리하고 JWT 토큰을 쿠키에 저장합니다.
+     *
+     *    ➡️ 클라이언트가 카카오 로그인 성공 후 인가 코드를 전달하면, 이 코드를 사용하여
+     *        카카오 인증 서버에서 액세스 토큰을 받고, 이를 통해 사용자를 인증한 후 JWT 토큰을 생성합니다.
+     *    ➡️ 생성된 JWT 토큰은 쿠키로 만들어서 클라이언트에게 반환되며, 이후 요청에서 인증에 사용됩니다.
+     *
+     * @param code 카카오 인증 서버로부터 받은 인가 코드입니다.
+     * @param response 클라이언트에게 응답을 보내기 위해 사용되는 `HttpServletResponse` 객체입니다.
+     *                 이 객체를 통해 JWT 토큰을 담은 쿠키를 클라이언트에게 전달합니다.
+     * @return 홈 페이지로 리다이렉트하는 문자열입니다.
+     * @throws JsonProcessingException JSON 처리 중 발생할 수 있는 예외입니다.
+     */
+    @GetMapping("/user/kakao/callback")
+    public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
+        // ✅ 카카오 서버로부터 받은 인가 코드를 Service로 전달하여 인증을 처리하고, JWT 토큰을 반환받습니다.
+        String token = kakaoService.kakaoLogin(code);
+
+        // ✅ 반환된 JWT 토큰을 쿠키로 생성합니다.
+        //    ➡️ 쿠키의 이름은 'Authorization'이며, 토큰의 'Bearer ' 부분을 제외한 값을 저장합니다.
+        Cookie cookie = new Cookie(JwtUtil.AUTHORIZATION_HEADER, token.substring(7));
+        cookie.setPath("/"); // 쿠키의 경로를 설정하여 모든 요청에서 쿠키가 전송되도록 합니다.
+        response.addCookie(cookie); // 쿠키를 HTTP 응답에 추가하여 클라이언트에게 전송합니다.
+
+        // ✅ 홈 페이지로 리다이렉트합니다.
+        return "redirect:/";
     }
 }
