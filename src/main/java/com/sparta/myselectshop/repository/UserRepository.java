@@ -34,4 +34,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return Optional<User> 사용자 이메일에 해당하는 사용자 정보가 포함된 Optional 객체
      */
     Optional<User> findByEmail(String email);
+
+    /**
+     * ✅ 카카오 ID로 사용자 정보를 조회합니다.
+     *
+     *    ➡️ 주어진 카카오 ID를 기반으로 사용자 정보를 조회하고,
+     *      해당 카카오 ID에 연결된 사용자가 존재하는 경우 Optional에 감싸서 반환합니다.
+     *
+     *    ➡️ 카카오 로그인과 같은 소셜 로그인에서 사용되는 사용자 정보를 처리하는 데 사용됩니다.
+     *
+     * @param kakaoId 카카오 사용자 고유 ID
+     * @return Optional<User> 카카오 ID에 해당하는 사용자 정보가 포함된 Optional 객체
+     */
+    Optional<User> findByKakaoId(Long kakaoId);
 }
