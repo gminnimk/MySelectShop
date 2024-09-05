@@ -3,9 +3,6 @@ package com.sparta.myselectshop.controller;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
-import com.sparta.myselectshop.entity.ApiUseTime;
-import com.sparta.myselectshop.entity.User;
-import com.sparta.myselectshop.repository.ApiUseTimeRepository;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.ProductService;
 import java.util.List;
@@ -25,56 +22,21 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService; // 상품 관련 비즈니스 로직을 처리하는 서비스 클래스
-    private final ApiUseTimeRepository apiUseTimeRepository;
 
     /**
      * ✅ 새로운 상품을 생성하는 API 엔드포인트입니다.
      *
-     *      ➡️ 클라이언트로부터 상품 생성에 필요한 정보를 포함하는 요청 본문을 받아서 새로운 상품을 생성합니다.
-     *          생성된 상품의 정보는 `ProductResponseDto` 형태로 반환됩니다.
+     *      ➡️ 클라이언트로부터 상품 정보를 포함하는 요청 본문을 받아서 상품을 생성하고, 생성된 상품의 정보를 반환합니다.
      *
-     * @param requestDto  클라이언트가 제공한 상품 생성 요청 데이터입니다. 이 DTO는 상품의 제목, 이미지 URL, 링크 URL, 가격 등을 포함합니다.
-     * @param userDetails 인증된 사용자 정보입니다. 요청을 보내는 사용자의 정보를 담고 있으며, 상품 생성 시 사용자와 연관됩니다.
-     * @return ProductResponseDto 생성된 상품의 정보를 담고 있는 DTO입니다. 상품의 ID, 제목, 이미지 URL, 링크 URL, 가격 등이 포함됩니다.
+     * @param requestDto  클라이언트가 제공한 상품 생성 요청 데이터입니다.
+     * @param userDetails 인증된 사용자 정보입니다.
+     * @return ProductResponseDto 생성된 상품의 정보가 담긴 DTO입니다.
      */
-    @PostMapping("/products")
-    public ProductResponseDto createProduct(
-        @RequestBody ProductRequestDto requestDto, // 상품 생성에 필요한 요청 데이터를 포함하는 DTO 객체입니다.
-        @AuthenticationPrincipal UserDetailsImpl userDetails // 현재 인증된 사용자의 상세 정보를 포함하는 객체입니다.
-    ) {
-        // 측정 시작 시간: 상품 생성 작업의 소요 시간을 측정하기 위해 현재 시간을 기록합니다.
-        long startTime = System.currentTimeMillis();
-
-        try {
-            // 상품 생성 서비스 호출: 요청 본문에서 받은 데이터를 바탕으로 상품을 생성하고, 생성된 상품의 정보를 반환합니다.
-            return productService.createProduct(requestDto, userDetails.getUser());
-        } finally {
-            // 측정 종료 시간: 상품 생성 작업이 완료된 후의 시간을 기록합니다.
-            long endTime = System.currentTimeMillis();
-            // 소요 시간 계산: 종료 시간과 시작 시간의 차이를 계산하여 상품 생성 작업의 소요 시간을 측정합니다.
-            long runTime = endTime - startTime;
-
-            // 로그인 사용자 정보: 현재 인증된 사용자의 정보를 가져옵니다.
-            User loginUser = userDetails.getUser();
-
-            // API 사용 시간 기록: 사용자별 API 사용 시간을 기록하기 위해 DB에서 사용자 정보를 조회합니다.
-            ApiUseTime apiUseTime = apiUseTimeRepository.findByUser(loginUser)
-                .orElse(null);
-
-            if (apiUseTime == null) {
-                // 사용자의 기록이 없을 경우: 새로 생성된 API 사용 기록 객체를 생성하여 소요 시간을 기록합니다.
-                apiUseTime = new ApiUseTime(loginUser, runTime);
-            } else {
-                // 사용자의 기록이 이미 있을 경우: 기존의 API 사용 기록에 소요 시간을 추가합니다.
-                apiUseTime.addUseTime(runTime);
-            }
-
-            // API 사용 시간 로그 출력: 콘솔에 사용자의 API 사용 시간 정보를 출력하여 디버깅 및 모니터링에 사용합니다.
-            System.out.println("[API Use Time] Username: " + loginUser.getUsername() + ", Total Time: " + apiUseTime.getTotalTime() + " ms");
-
-            // API 사용 시간 DB에 저장: 업데이트된 API 사용 시간 정보를 DB에 저장하여 추후 분석 및 리포트에 사용합니다.
-            apiUseTimeRepository.save(apiUseTime);
-        }
+    @PostMapping("/products") // POST 메서드로 "/api/products" 경로에 매핑됩니다.
+    public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // 서비스 계층의 createProduct 메서드를 호출하여 상품을 생성하고, 결과를 반환합니다.
+        return productService.createProduct(requestDto, userDetails.getUser());
     }
 
     /**
