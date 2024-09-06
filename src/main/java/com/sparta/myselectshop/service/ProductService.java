@@ -2,9 +2,12 @@ package com.sparta.myselectshop.service;
 
 import com.sparta.myselectshop.entity.Folder;
 import com.sparta.myselectshop.entity.ProductFolder;
+import com.sparta.myselectshop.exception.ProductNotFoundException;
 import com.sparta.myselectshop.repository.FolderRepository;
 import com.sparta.myselectshop.repository.ProductFolderRepository;
+import java.util.Locale;
 import java.util.Optional;
+import org.springframework.context.MessageSource;
 import org.springframework.transaction.annotation.Transactional;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
@@ -36,6 +39,7 @@ public class ProductService {
     private final ProductRepository productRepository; // 상품 정보를 처리하는 리포지토리
     private final FolderRepository folderRepository;
     private final ProductFolderRepository productFolderRepository;
+    private final MessageSource messageSource;
 
     public static final int MIN_MY_PRICE = 100; // 사용자가 설정할 수 있는 최소 가격
 
@@ -61,30 +65,46 @@ public class ProductService {
     }
 
     /**
-     * ✅ 주어진 상품 ID에 해당하는 상품의 사용자 설정 가격을 업데이트합니다.
-     * <p>
-     * ➡️ 요청 본문에서 전달받은 `ProductMypriceRequestDto` 객체의 가격이 유효한지 확인한 후, 해당 상품을 데이터베이스에서 조회하여 가격을
-     * 업데이트합니다. ➡️ 업데이트된 상품 정보를 `ProductResponseDto` 형식으로 반환합니다.
+     * ✅ 주어진 상품 ID에 해당하는 상품의 사용자 설정 가격을 업데이트하는 메서드입니다.
+     *
+     *    ➡️ 요청 본문에서 전달받은 `ProductMypriceRequestDto` 객체로부터 설정 가격을 가져오고,
+     *        해당 가격이 최소 가격 기준을 충족하는지 확인합니다.
+     *    ➡️ 가격이 유효하면, 데이터베이스에서 상품을 조회하여 가격을 업데이트하고,
+     *        업데이트된 상품 정보를 `ProductResponseDto` 형식으로 반환합니다.
      *
      * @param id         업데이트할 상품의 고유 ID입니다.
+     *                   ➡️ 이 ID를 통해 데이터베이스에서 해당 상품을 조회합니다.
      * @param requestDto 상품의 사용자 설정 가격이 포함된 DTO 객체입니다.
+     *                   ➡️ 클라이언트로부터 전달받은 요청 본문으로, 사용자 정의 가격을 포함합니다.
      * @return ProductResponseDto 업데이트된 상품 정보를 포함하는 DTO 객체입니다.
-     * @throws IllegalAccessException 요청 본문에서 전달받은 가격이 최소 가격 기준을 충족하지 않을 경우 발생하는 예외입니다.
+     *         ➡️ 업데이트된 상품의 ID, 이름, 사용자 설정 가격 등을 반환합니다.
+     * @throws IllegalArgumentException 요청 본문에서 전달받은 가격이 최소 가격 기준을 충족하지 않을 경우 발생하는 예외입니다.
+     *                                  ➡️ 설정된 최소 가격보다 낮은 가격이 입력되면, 예외가 발생하고, 적절한 오류 메시지가 반환됩니다.
+     * @throws ProductNotFoundException 주어진 ID에 해당하는 상품을 찾을 수 없을 경우 발생하는 예외입니다.
+     *                                  ➡️ 데이터베이스에 상품이 존재하지 않으면 예외가 발생하고, 해당 오류 메시지가 반환됩니다.
      */
-    @Transactional // 트랜잭션 처리를 위한 어노테이션입니다.
-    public ProductResponseDto updateProduct(Long id, ProductMypriceRequestDto requestDto)
-        throws IllegalAccessException {
-        int myprice = requestDto.getMyprice(); // 요청 본문에서 전달받은 사용자 설정 가격
+    @Transactional
+    public ProductResponseDto updateProduct(Long id, ProductMypriceRequestDto requestDto) {
+        int myprice = requestDto.getMyprice();
 
-        // 사용자 설정 가격이 최소 가격 기준을 충족하지 않을 경우 예외를 던집니다.
+        // 사용자 설정 가격이 최소 가격 기준을 충족하는지 확인합니다.
         if (myprice < MIN_MY_PRICE) {
-            throw new IllegalAccessException(
-                "유효하지 않은 관심 가격입니다. 최소 " + MIN_MY_PRICE + "원 이상으로 설정해 주세요.");
+            throw new IllegalArgumentException(messageSource.getMessage(
+                "below.min.my.price", // 오류 메시지 키
+                new Integer[]{MIN_MY_PRICE}, // 최소 허용 가격 정보
+                "Wrong Price", // 기본 메시지
+                Locale.getDefault() // 로케일 설정
+            ));
         }
 
         // 데이터베이스에서 상품을 조회하고, 없을 경우 예외를 던집니다.
         Product product = productRepository.findById(id).orElseThrow(() ->
-            new NullPointerException("해당 상품을 찾을 수 없습니다.")
+            new ProductNotFoundException(messageSource.getMessage(
+                "not.found.product", // 오류 메시지 키
+                null, // 추가 매개변수 없음
+                "Not Found Product", // 기본 메시지
+                Locale.getDefault() // 로케일 설정
+            ))
         );
 
         // 조회된 상품의 가격을 업데이트합니다.
@@ -93,6 +113,7 @@ public class ProductService {
         // 업데이트된 상품 정보를 기반으로 ProductResponseDto를 생성하여 반환합니다.
         return new ProductResponseDto(product);
     }
+
 
     /**
      * ✅ 데이터베이스에서 현재 사용자가 등록한 모든 상품 정보를 조회하여 페이지네이션된 DTO 리스트로 변환합니다.
