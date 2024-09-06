@@ -2,12 +2,9 @@ package com.sparta.myselectshop.controller;
 
 import com.sparta.myselectshop.dto.FolderRequestDto;
 import com.sparta.myselectshop.dto.FolderResponseDto;
-import com.sparta.myselectshop.exception.RestApiException;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.FolderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,27 +55,5 @@ public class FolderController {
     public List<FolderResponseDto> getFolders(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         // 현재 인증된 사용자의 정보를 통해 폴더 목록을 조회하고 반환합니다.
         return folderService.getFolders(userDetails.getUser());
-    }
-
-    /**
-     * ✅ IllegalArgumentException 예외를 처리하는 메서드입니다.
-     *
-     *    ➡️ 폴더 관련 작업 중 `IllegalArgumentException`이 발생할 경우, 이 메서드가 실행됩니다.
-     *    ➡️ 발생한 예외의 메시지를 바탕으로 `RestApiException` 객체를 생성하고,
-     *       HTTP 상태 코드 400 (BAD_REQUEST)와 함께 클라이언트에게 응답합니다.
-     *
-     * @param ex 발생한 IllegalArgumentException 예외 객체입니다.
-     * @return ResponseEntity<RestApiException> 에러 메시지와 상태 코드가 포함된 응답 객체입니다.
-     */
-    @ExceptionHandler({IllegalArgumentException.class}) // IllegalArgumentException 발생 시 이 메서드가 호출됩니다.
-    public ResponseEntity<RestApiException> handleException(IllegalArgumentException ex) {
-        // 예외 메시지와 HTTP 상태 코드를 담은 RestApiException 객체를 생성합니다.
-        RestApiException restApiException = new RestApiException(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-
-        // RestApiException 객체와 HTTP 상태 400 (BAD_REQUEST)을 응답으로 반환합니다.
-        return new ResponseEntity<>(
-            restApiException, // HTTP 응답 본문에 포함될 내용입니다.
-            HttpStatus.BAD_REQUEST // HTTP 응답 상태 코드를 400으로 설정합니다.
-        );
     }
 }
